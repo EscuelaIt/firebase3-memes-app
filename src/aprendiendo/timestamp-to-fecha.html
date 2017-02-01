@@ -1,0 +1,54 @@
+
+<link rel="import" href="../utils/moment-element.html">
+
+<dom-module id="timestamp-to-fecha">
+  <template>
+    <span>{{fecha}}</span>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'timestamp-to-fecha',
+
+      properties: {
+        timestamp: {
+          type: Number
+        },
+        fecha: {
+          type: String,
+          computed: 'toFecha(timestamp)'
+        }, 
+        relative: {
+          type: Boolean,
+          value: false
+        },
+        formato: {
+          type: String,
+          value: 'fecha'
+        }
+
+      },
+      toFecha: function(t) {
+        ////console.log('relativo', this.relative)
+        var d = moment(parseInt(t));
+        if(this.relative){
+          return d.from();
+        } else {
+          switch(this.formato){
+            case 'fecha':
+              return d.format('D/M/YYYY');
+              break;
+            case 'hora':
+              return d.format('HH:mm');
+              break;
+          }
+
+        }
+      }
+
+    });
+  })();
+  </script>
+</dom-module>

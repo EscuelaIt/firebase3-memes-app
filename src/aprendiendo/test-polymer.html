@@ -1,0 +1,27 @@
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+
+<dom-module id="test-polymer">
+  <template>
+    <style>
+      :host {
+        display: block;
+        color: red;
+      }
+      h1 {
+        color: blueviolet;
+      }
+      p{
+        font-size: .8em;
+      }
+    </style>
+    <h1>Bienvenidos a Polymer</h1>
+    <p>Esto es un test</p>
+  </template>
+  <script>
+    Polymer({
+      is: 'test-polymer'
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,50 @@
+
+
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+
+
+<dom-module id="avatar-grande">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      iron-image {
+        width: 48px;
+        height: 48px;
+        --iron-image-width: 48px;
+        --iron-image-height: 48px;
+      }
+      @media (min-width: 370px){
+        iron-image {
+          width: 64px;
+          height: 64px;
+          --iron-image-width: 64px;
+          --iron-image-height: 64px;
+        }
+      } 
+      @media (min-width: 430px){
+        iron-image {
+          border-radius: 50%;
+        }
+      }
+    </style>
+
+    <iron-image src="[[img]]" sizing="cover"></iron-image>
+  
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'avatar-grande',
+      
+      properties: {
+        img: String
+      },
+
+    });
+  })();
+  </script>
+</dom-module>
