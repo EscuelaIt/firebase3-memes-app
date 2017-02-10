@@ -1,0 +1,81 @@
+
+<dom-module id="login-users">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      [hidden] {display: none}
+    </style>
+    
+    <firebase-auth 
+      id="auth" 
+      user="{{user}}" 
+      provider="google"
+      signed-in="{{logueado}}"
+    ></firebase-auth>
+    
+    <paper-icon-button hidden$="{{logueado}}" icon="icons:account-circle" on-tap="loguearse"></paper-icon-button>
+    <paper-icon-button hidden$="{{!logueado}}" icon="icons:exit-to-app" on-tap="logout"></paper-icon-button>
+    
+
+
+  </template>
+  <script>
+    Polymer({
+      is: 'login-users',
+
+      behaviors: [FirebaseBehavior],
+      
+      properties: {
+        user: {
+          type: Object,
+          notify: true
+        },
+        logueado: Boolean,
+      }, 
+
+      loguearse: function() {
+        var that = this;
+        console.log('do login');
+        this.$.auth.signInWithPopup()
+          .then(function(result) {
+            console.log(result);
+            that.generaPerfil(result.user);
+          })
+          .catch(function(err) {
+            console.log(err);
+          });
+      },
+
+      logout: function() {
+        this.$.auth.signOut()
+      },
+
+      generaPerfil: function(user) {
+        var name = user.displayName || 'NombreDesconocido';
+        var email = user.email || 'emaildesconocido@example.com';
+        var photoURL = user.photoURL || 'http://desarrolloweb.com/images/defaultavatar.jpg';
+        var perfil = {
+          name: name,
+          email: email,
+          photoURL: photoURL
+        };
+        var ref = this.fbref(this.fb__userOne(user.uid));
+        ref.once('value', function(ss) {
+          if(!ss.val()) {
+            //no tengo perfil creado
+            ref.set(perfil)
+              .then(function() {
+                console.log('perfil creado');
+              })
+              .catch(function(err) {
+                console.log('error', err)
+              });
+          }
+        });
+      }
+
+    });
+  </script>
+</dom-module>

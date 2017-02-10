@@ -1,0 +1,38 @@
+<script>
+FirebaseBehavior = {
+  properties: {
+    fbapp: {
+      type: Object,
+      value: function() {
+        return this.getFbapp();
+      }
+    }
+  },
+
+  getFbapp: function() {
+    return document.createElement('iron-meta').byKey('fbapp');
+  },
+  
+  fbref: function(ruta) {
+    if(!this.fbapp) {
+      this.fbapp = this.getFbapp();
+    }
+    return this.fbapp.database().ref(ruta);
+  },
+
+  // USERS
+  fb__userAll: function() {
+    return '/users';
+  },
+  fb__userOne: function(id) {
+    return this.fb__userAll() + '/' + id;
+  },
+
+  fb__memesAll: function() {
+    return '/memes';
+  },
+  fb__memesOne: function(id) {
+    return this.fb__memesAll() + '/' + id;
+  },
+}
+</script>

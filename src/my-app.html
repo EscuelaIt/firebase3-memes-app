@@ -23,16 +23,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- IRON ELEMENTS -->
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 
 <!-- PAPER ELEMENTS -->
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="my-icons.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
 
  <!--FIREBASE -->
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 
+<!-- BEHAVIORS -->
+<link rel="import" href="behaviors/firebase-behavior.html">
+
+
 <!-- MY ELEMENTS -->
+<link rel="import" href="my-icons.html">
 <link rel="import" href="utils/moment-element.html">
+<link rel="import" href="./login/login-users.html">
+
 
 
 <dom-module id="my-app">
@@ -79,7 +88,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       api-key="AIzaSyCXhHDjuVSDHQxdRhc_CRwjtTzQNhV_6Mw"
       storage-bucket="fir-3-curso.appspot.com"
       messaging-sender-id="496003402473"
+      app="{{fbapp}}"
     ></firebase-app>
+
+    <iron-meta key="fbapp" value="[[fbapp]]"></iron-meta>
+
+    <firebase-document
+      path="{{locUser}}"
+      data="{{userData}}"
+    ></firebase-document>
 
     <app-location route="{{route}}"></app-location>
     <app-route
@@ -105,7 +122,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-header condenses reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
-            <div main-title>My App</div>
+            <div main-title>Memes Rocks!!</div>
+
+            <login-users user="{{user}}"></login-users>
+            {{userData.name}}
           </app-toolbar>
         </app-header>
 
@@ -127,12 +147,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     Polymer({
       is: 'my-app',
 
+      behaviors: [FirebaseBehavior],
+
       properties: {
         page: {
           type: String,
           reflectToAttribute: true,
           observer: '_pageChanged',
         },
+        app: Object,
+        user: Object,
+        userData: Object,
+        locUser: {
+          type: String,
+          computed: 'fb__userOne(user.uid)'
+        }
       },
 
       ready: function() {

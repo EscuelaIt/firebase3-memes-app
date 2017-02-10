@@ -1,0 +1,36 @@
+
+<dom-module id="test-meme">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <p>
+      [[meme.slug]] 
+      <paper-icon-button icon="cancel" on-tap="eliminar"></paper-icon-button>
+      <paper-icon-button icon="create" on-tap="editar"></paper-icon-button>
+
+      </p>
+  </template>
+  <script>
+    Polymer({
+      is: 'test-meme',
+
+      behaviors: [FirebaseBehavior],
+
+      properties: {
+        meme: Object
+      },
+
+      eliminar: function(){
+        console.log(this.meme);
+        this.fbref(this.fb__memesOne(this.meme.$key)).remove();
+      },
+      editar: function(){
+        console.log(this.meme);
+        this.fbref(this.fb__memesOne(this.meme.$key)).set({slug: 'lalala'});
+      },
+    });
+  </script>
+</dom-module>

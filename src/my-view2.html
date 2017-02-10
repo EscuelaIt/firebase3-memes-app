@@ -11,6 +11,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="shared-styles.html">
 
+
+<link rel="import" href="./aprendiendo/test-meme.html">
+
 <dom-module id="my-view2">
   <template>
     <style include="shared-styles">
@@ -21,17 +24,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
+    <firebase-query
+      id="query"
+      path="/memes"
+      data="{{memes}}">
+    </firebase-query>
+
     <div class="card">
-      <div class="circle">2</div>
-      <h1>View Two</h1>
-      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.</p>
-      <p>Id nam odio natum malorum, tibique copiosae expetenda mel ea.Detracto suavitate repudiandae no eum. Id adhuc minim soluta nam.Id nam odio natum malorum, tibique copiosae expetenda mel ea.</p>
+      <h1>Memes</h1>
+      <template is="dom-repeat" items="[[memes]]">
+        <test-meme meme="[[item]]"></test-meme>
+      </template>
     </div>
+
+    
+    <paper-input label="slug" value="{{slug}}"></paper-input> 
+    <paper-button raised on-tap="crear">Crear meme</paper-button>
+    
+    
   </template>
 
   <script>
     Polymer({
       is: 'my-view2',
+
+      behaviors: [FirebaseBehavior],
+
+      properties: {
+        memes: Array,
+        slug: String
+      },
+
+      crear: function() {
+        this.fbref(this.fb__memesAll()).push({
+          'slug': this.slug
+        });
+      }
     });
   </script>
 </dom-module>
