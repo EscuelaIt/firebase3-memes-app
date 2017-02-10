@@ -9,6 +9,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
+
+<!-- APP-ELEMENTS -->
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
@@ -17,14 +19,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
+
+<!-- IRON ELEMENTS -->
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+
+<!-- PAPER ELEMENTS -->
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="my-icons.html">
 
+ <!--FIREBASE -->
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 
-
+<!-- MY ELEMENTS -->
 <link rel="import" href="utils/moment-element.html">
+
 
 <dom-module id="my-app">
   <template>
@@ -61,6 +70,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         font-weight: bold;
       }
     </style>
+
+
+    <!-- FIREBASE -->
+    <firebase-app 
+      auth-domain="fir-3-curso.firebaseapp.com"
+      database-url="https://fir-3-curso.firebaseio.com"
+      api-key="AIzaSyCXhHDjuVSDHQxdRhc_CRwjtTzQNhV_6Mw"
+      storage-bucket="fir-3-curso.appspot.com"
+      messaging-sender-id="496003402473"
+    ></firebase-app>
 
     <app-location route="{{route}}"></app-location>
     <app-route
