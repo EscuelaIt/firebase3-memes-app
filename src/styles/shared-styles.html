@@ -1,0 +1,63 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- shared styles for all views -->
+<dom-module id="shared-styles">
+  <template>
+    <style>
+      [hidden] {display: none}
+      .linkherit{
+        color: inherit;
+        text-decoration: none;
+      }
+      app-toolbar {
+        background: var(--accent-color);
+        color: #fff;
+      }
+      .contenedor {
+        color: #666;
+      }
+      .acciones{
+        text-align: right;
+        color: var(--primary-color);
+      }
+      .onlybig {
+         display: none;
+       }
+       .iteraccionbutton {
+        --paper-button: {
+          background-color: #eee;
+          color: var(--accent-color);
+        }
+      }
+      .iteraccionbutton span {
+        display: none
+      }
+     @media(min-width: 450px) {
+       .contenedor {
+         margin: 10px;
+       }
+       .onlybig {
+         display: block;
+       }
+       .onlysmall {
+         display: none;
+       }
+       .iteraccionbutton span {
+          margin-left: 5px;
+          display: block;
+        }
+     } 
+
+    </style>
+  </template>
+</dom-module>

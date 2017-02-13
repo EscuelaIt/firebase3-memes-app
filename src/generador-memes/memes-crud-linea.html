@@ -1,0 +1,85 @@
+
+<link rel="import" href="memes-crud-publico.html">
+
+
+<dom-module id="memes-crud-linea">
+  <template>
+    <style include="shared-styles"></style>
+    <style include="dropdown-styles">
+      :host {
+        display: block;
+      }
+      .dropdown-content{
+        width: 250px;
+      }
+      paper-icon-item {
+        --paper-icon-item: {
+          font-size: .9em;
+        };
+      }
+    </style>
+    <paper-item>
+      <paper-item-body two-line>
+        <div>[[meme.name]]</div>
+        <div secondary>
+          [[meme.description]] [[meme.$key]]
+        </div>
+      </paper-item-body>
+      <paper-icon-button icon="create" on-tap="editarMeme"></paper-icon-button>
+      <paper-icon-button icon="more-vert" on-tap="abrirDrop"></paper-icon-button>
+    </paper-icon-item>
+
+    
+    <iron-dropdown 
+      horizontal-align="right" 
+      vertical-align="top" 
+      vertical-offset="40"
+      id="dropd"
+      open-animation-config="[[animacionEntrada]]" 
+      close-animation-config="[[animacionSalida]]"   
+    >
+      <div class="dropdown-content">
+        
+        <paper-icon-item on-tap="borrarMeme">
+          <iron-icon icon="close" item-icon></iron-icon>
+          Borrar
+        </paper-icon-item>
+        <a href$="/meme/[[user.uid]]/[[meme.$key]]" class="linkherit">
+        <paper-icon-item>
+          <iron-icon icon="open-in-browser" item-icon></iron-icon>
+          Ver el memeeee
+        </paper-icon-item>
+        </a>
+        <paper-item>
+          <memes-crud-publico 
+            meme="[[meme]]"
+            user="[[user]]"
+          ></memes-crud-publico>
+        </paper-item>
+          
+      </div>
+    </iron-dropdown>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'memes-crud-linea',
+
+      behaviors: [DropdownBehavior],
+
+      properties: {
+        meme: Object,
+        user: Object,
+      },
+
+      editarMeme: function() {
+        this.fire('editar-meme', this.meme);
+      },
+
+      borrarMeme: function() {
+        this.fire('borrar-meme', this.meme);
+        this.$.dropd.close();
+      }
+    });
+  </script>
+</dom-module>

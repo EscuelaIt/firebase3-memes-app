@@ -1,0 +1,65 @@
+
+<link rel="import" href="../styles/dropdown-styles.html">
+<link rel="import" href="../behaviors/dropdown-behavior.html">
+<link rel="import" href="../interfaces/icons-rrss.html">
+
+<dom-module id="boton-login">
+  <template>
+    <style include="dropdown-styles">
+      :host {
+        display: block;
+      }
+      .dropdown-content{
+        width: 250px;
+        font-size: .7em;
+      }
+      paper-button {
+        margin-bottom: 10px;
+        width: 100%;
+      }
+      paper-button span{
+        margin-left: 15px;
+      }
+    </style>
+
+    <paper-icon-button icon="icons:account-circle" on-tap="abrirDrop" hidden="{{logueado}}"></paper-icon-button>
+
+    <iron-dropdown 
+      horizontal-align="right" 
+      vertical-align="top" 
+      vertical-offset="40"
+      id="dropd"
+      open-animation-config="[[animacionEntrada]]" 
+      close-animation-config="[[animacionSalida]]"   
+    >
+      <div class="dropdown-content">
+        
+        <paper-button raised on-tap="loguearseGoogle">
+          <iron-icon icon="rrss:google"></iron-icon>
+          <span>Login con Google</span>
+        </paper-button>
+        <paper-button raised on-tap="loguearseTwitter">
+          <iron-icon icon="rrss:twitter"></iron-icon>
+          <span>Login con Twitter</span>
+        </paper-button>
+          
+      </div>
+    </iron-dropdown>
+  </template>
+  <script>
+    Polymer({
+      is: 'boton-login',
+
+      behaviors: [DropdownBehavior],
+
+      loguearseGoogle: function() {
+        this.fire('login-google-request');
+        this.$.dropd.close();
+      },
+      loguearseTwitter: function() {
+        this.fire('login-twitter-request');
+        this.$.dropd.close();
+      }
+    });
+  </script>
+</dom-module>

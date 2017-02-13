@@ -1,0 +1,52 @@
+
+<dom-module id="memes-crud-editar">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+    <memes-crud-formulario 
+      id="form"
+      item="{{item}}"
+      edicion="true"
+    ></memes-crud-formulario>
+    <p class="acciones">
+      <paper-button on-tap="cancelar">Cancelar</paper-button>
+      <paper-button on-tap="editar">Editar</paper-button>
+    </p>
+  </template>
+  <script>
+    Polymer({
+      is: 'memes-crud-editar',
+      
+      behaviors: [FirebaseBehavior, EmisorFeedbackBehavior],
+
+      properties: {
+        item: Object,
+        user: Object
+      },
+
+      cancelar: function() {
+        this.fire('volver-listado')
+      },
+
+      editar: function() {
+        var that = this;
+        var itemUpdate = {
+          description: this.item.description,
+          name: this.item.name
+        };
+        var ref = this.fbref(this.fb__memesUserOne(this.user.uid, this.item.$key));
+        ref.update(itemUpdate)
+          .then(function() {
+            that.feedbackPositivo('El meme se ha editado');
+            that.fire('volver-listado')
+          })
+          .catch(function() {
+            that.feedbackNegativo('Error en la edición del meme');            
+          })
+      }
+    });
+  </script>
+</dom-module>

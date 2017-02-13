@@ -1,4 +1,9 @@
 
+<link rel="import" href="./boton-login.html">
+<link rel="import" href="./boton-loged-in.html">
+
+
+
 <dom-module id="login-users">
   <template>
     <style>
@@ -11,13 +16,13 @@
     <firebase-auth 
       id="auth" 
       user="{{user}}" 
-      provider="google"
+      provider="{{provider}}"
       signed-in="{{logueado}}"
     ></firebase-auth>
     
-    <paper-icon-button hidden$="{{logueado}}" icon="icons:account-circle" on-tap="loguearse"></paper-icon-button>
-    <paper-icon-button hidden$="{{!logueado}}" icon="icons:exit-to-app" on-tap="logout"></paper-icon-button>
-    
+
+    <boton-login hidden$="{{logueado}}"></boton-login>
+    <boton-loged-in user-data="[[userData]]" hidden$="{{!logueado}}"></boton-loged-in>
 
 
   </template>
@@ -25,57 +30,102 @@
     Polymer({
       is: 'login-users',
 
-      behaviors: [FirebaseBehavior],
+      behaviors: [FirebaseBehavior, EmisorFeedbackBehavior],
       
       properties: {
         user: {
           type: Object,
           notify: true
         },
+        userData: Object,
         logueado: Boolean,
+        online: Boolean,
+        provider: {
+          type: String,
+          value: 'google'
+        }
       }, 
+
+      listeners: {
+        'login-google-request': 'loguearseGoogle',
+        'login-twitter-request': 'loguearseTwitter',
+        'logout-request': 'logout'
+      },
+
+      loguearseGoogle: function() {
+        this.provider = 'google';
+        this.loguearse();
+      },
+
+      loguearseTwitter: function() {
+        this.provider = 'twitter';
+        this.loguearse();
+      },
 
       loguearse: function() {
         var that = this;
-        console.log('do login');
         this.$.auth.signInWithPopup()
           .then(function(result) {
-            console.log(result);
-            that.generaPerfil(result.user);
+            //tengo un usuario
+            //console.log('credencial: ', result.credential );
+            that.fire('login-success');
+            that.feedbackPositivo('Login realizado');
+            that.saveProfile(result.user, result.credential);
           })
-          .catch(function(err) {
-            console.log(err);
+          .catch(function(err) {
+            //no tengo un usuario...
+            //console.log('error detectado', err);
+            that.feedbackNegativo(err.message);
           });
+        console.log('ahora.....');  
+        // ....
       },
 
-      logout: function() {
-        this.$.auth.signOut()
-      },
-
-      generaPerfil: function(user) {
-        var name = user.displayName || 'NombreDesconocido';
-        var email = user.email || 'emaildesconocido@example.com';
-        var photoURL = user.photoURL || 'http://desarrolloweb.com/images/defaultavatar.jpg';
-        var perfil = {
-          name: name,
-          email: email,
-          photoURL: photoURL
-        };
-        var ref = this.fbref(this.fb__userOne(user.uid));
-        ref.once('value', function(ss) {
-          if(!ss.val()) {
-            //no tengo perfil creado
-            ref.set(perfil)
-              .then(function() {
-                console.log('perfil creado');
-              })
-              .catch(function(err) {
-                console.log('error', err)
+      saveProfile: function(user, credential) {
+        //console.log('en save profile', user, credential)
+        var that = this;
+        var refProfile = this.fbref(this.fb__userOne(user.uid));
+        refProfile.once('value', function(ss){
+          if(!ss.val()){
+            //console.log('no tieene perfil, vamos a crearlo')
+            var perfil = that.generaPerfil(user, credential);
+            console.log('creando perfil: ', JSON.stringify(perfil))
+            refProfile.set(perfil)
+              .catch(function(err){
+                console.log('error en saveProfile')
               });
           }
         });
-      }
+      },
 
+      generaPerfil: function(user, credential) {
+        var accessToken = credential.accessToken || null;
+        var secret = credential.secret || null;
+        var idToken = credential.idToken || null;
+        var name = user.displayName || 'NombreDesconocido';
+        var email = user.email || 'emaildesconocido@example.com';
+        var photoURL = user.photoURL || 'http://desarrolloweb.com/images/defaultavatar.jpg';
+        var provider = credential.provider || 'provider desconocido';
+        return {
+          name: name,
+          email: email,
+          photoURL: photoURL,
+          credential: {
+            accessToken: accessToken,
+            idToken: idToken,
+            provider: provider,
+            secret: secret
+          }
+        };
+      },
+
+      logout: function() {
+        var that = this; 
+        this.$.auth.signOut()
+          .then(function() {
+            that.feedbackPositivo('Has cerrado la sesión');
+          })
+      },
     });
   </script>
 </dom-module>

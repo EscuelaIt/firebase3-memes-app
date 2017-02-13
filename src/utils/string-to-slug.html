@@ -1,0 +1,32 @@
+
+<dom-module id="string-to-slug">
+  <script>
+    Polymer({
+      is: 'string-to-slug',
+
+      properties: {
+        string: {
+          type: String,
+          value: ''
+        },
+        slug: {
+          type: String,
+          computed: 'convertSlug(string)',
+          notify: true
+        }
+      },
+
+      convertSlug: function(str) {
+        //https://gist.github.com/mathewbyrne/1280286
+        //console.log('convertSlug ', str)
+        if(typeof str === 'undefined') {
+          return ''
+        }
+        return str.toLowerCase()
+          .replace(/[^\w\s-]/g, '') // remove non-word [a-z0-9_], non-whitespace, non-hyphen characters
+          .replace(/[\s_-]+/g, '-') // swap any length of whitespace, underscore, hyphen characters with a single -
+          .replace(/^-+|-+$/g, ''); // remove leading, trailing -
+      }
+    });
+  </script>
+</dom-module>

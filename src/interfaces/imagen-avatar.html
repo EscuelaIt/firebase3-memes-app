@@ -1,0 +1,55 @@
+
+<dom-module id="imagen-avatar">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+      }
+      iron-image{
+        margin-top: 5px;
+        width: var(--avatar-width, 36px);
+        height: var(--avatar-height, 36px);
+        border-radius: 50%;
+        box-shadow: 2px 2px 2px #000;
+        --iron-image-height: var(--avatar-width, 36px);
+        --iron-image-width: var(--avatar-height, 36px);
+      }
+    </style>
+    <firebase-document
+      app-name="{{firebaseApp}}"
+      path="[[locPhoto]]"
+      data="{{imgResult}}"
+    ></firebase-document>
+
+    <iron-image id="avatar" src$="[[imagen]]"></iron-image>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'imagen-avatar',
+      
+      behaviors: [FirebaseBehavior],
+
+      properties: {
+        imagen: String,
+        id: String,
+        locPhoto: {
+          type: String,
+          computed: 'fb__userAvatar(id)'
+        },
+        imgResult: {
+          type: String,
+          observer: 'actualizaImagen'
+        }
+      },
+      actualizaImagen: function(imgRes) {
+        if(!this.image) {
+          this.imagen = imgRes;
+        } 
+      }
+    });
+  })();
+  </script>
+</dom-module>

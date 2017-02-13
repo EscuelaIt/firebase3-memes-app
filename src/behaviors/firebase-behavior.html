@@ -12,7 +12,7 @@ FirebaseBehavior = {
   getFbapp: function() {
     return document.createElement('iron-meta').byKey('fbapp');
   },
-  
+
   fbref: function(ruta) {
     if(!this.fbapp) {
       this.fbapp = this.getFbapp();
@@ -27,12 +27,85 @@ FirebaseBehavior = {
   fb__userOne: function(id) {
     return this.fb__userAll() + '/' + id;
   },
+  fb__userAvatar: function(id) {
+    return this.fb__userOne(id) + '/avatar';
+  },
+  fb__userName: function(id) {
+    return this.fb__userOne(id) + '/name';
+  },
 
+  // MEMES_USUARIO
+  fb__memesUserAll: function(id) {
+    return '/memesUser/' + id;
+  },
+  fb__memesUserOne: function(id, key) {
+    return this.fb__memesUserAll(id) + '/' + key;
+  },
+  fb_favMemeUser: function(idUser, memeLocData) {
+    //console.log('fb_favMemeUser', idUser, memeLocData)
+    return '/memesUserFavs/' + memeLocData.userId + '/' + memeLocData.slug + '/' + idUser
+  },
+  fb_favMemeAll: function(memeLocData) {
+    //console.log('fb_favMemeAll', '/memesUserFavs/' + memeLocData.userId + '/' + memeLocData.slug)
+    return '/memesUserFavs/' + memeLocData.userId + '/' + memeLocData.slug;
+  },
+
+  // MEMES GLOBALES
   fb__memesAll: function() {
     return '/memes';
   },
   fb__memesOne: function(id) {
     return this.fb__memesAll() + '/' + id;
   },
-}
+  fb__numFavs: function(id) {
+    return this.fb__memesOne(id) + '/numFavs'
+  },
+
+  // REQUEST MEME PUBLICO
+  fb__requestPublicMemeUser: function(uid) {
+    return '/requestPublicMeme/' + uid;
+  },
+  // REQUEST MEME PRIVADO
+  fb__requestPrivateMemeUser: function(uid) {
+    return '/requestPrivateMeme/' + uid;
+  },
+  // REQUEST SHARE TWITTER
+  fb_twitterShareRequestUser: function(uid) {
+    return '/twitter/shareRequest/' + uid;
+  },
+  // RESPONSE SHARE TWITTER
+  fb_twitterShareResponseUser: function(uid) {
+    return '/twitter/shareResponse/' + uid;
+  },
+
+  // NOTIFICATION REQUEST
+  fb_notificationRequest: function(uid) {
+    return '/notificationRequest/' + uid;
+  },
+
+  // NOTIFICATIONS USERS
+  fb__notificationsUser: function(uid) {
+    return '/notificationsUser/' + uid;
+  },
+  fb__notificationsUserOne: function(iduser, idnotif){
+    return this.fb__notificationsUser(iduser) + '/' + idnotif;
+  },
+
+  // TOKEN DE USUARIO PARA NOTIFICACIONES PUSH
+  fb__notificationTokenUser: function(id) {
+    return '/userTokenPush/' + id + '/token';
+  },
+
+  //una referencia a un punto del storage
+  fbStorageRef: function(ruta) {
+    if(!this.fbapp) {
+      this.fbapp = this.getFbapp();
+    }
+    return this.fbapp.storage().ref(ruta);
+  },
+
+  fs__memeImage: function(uid, archivo) {
+    return '/memes/' + uid + '/' + archivo + '.png';
+  }
+};
 </script>

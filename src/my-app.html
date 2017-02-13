@@ -23,24 +23,46 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- IRON ELEMENTS -->
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/iron-meta/iron-meta.html">
+<link rel="import" href="../bower_components/iron-dropdown/iron-dropdown.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../bower_components/iron-icons/social-icons.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+
 
 <!-- PAPER ELEMENTS -->
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 
- <!--FIREBASE -->
+
+<!-- NEON ANIMATION -->
+<link rel="import" href="../bower_components/neon-animation/animations/fade-in-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/slide-down-animation.html">
+
+<!-- FIREBASE -->
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 
 <!-- BEHAVIORS -->
 <link rel="import" href="behaviors/firebase-behavior.html">
+<link rel="import" href="behaviors/dropdown-behavior.html">
+<link rel="import" href="behaviors/emisor-feedback-behavior.html">
 
 
 <!-- MY ELEMENTS -->
 <link rel="import" href="my-icons.html">
+<link rel="import" href="styles/shared-styles.html">
 <link rel="import" href="utils/moment-element.html">
 <link rel="import" href="./login/login-users.html">
+
 
 
 
@@ -48,35 +70,73 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style>
       :host {
-        --app-primary-color: #4285f4;
-        --app-secondary-color: black;
+        --dark-primary-color:       #00796B;
+        --primary-color:            #009688;
+        --light-primary-color:      #B2DFDB;
+        --text-primary-color:       #FFFFFF;
+        --accent-color:             #00BCD4;
+        --primary-background-color: #c9d6ca;
+        --primary-text-color:       #212121;
+        --secondary-text-color:     #757575;
+        --disabled-text-color:      #BDBDBD;
+        --divider-color:            #BDBDBD;
+        --app-secondary-color:      black;
 
         display: block;
       }
 
       app-header {
         color: #fff;
-        background-color: var(--app-primary-color);
+        background-color: var(--primary-color);
       }
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
+      }
+
+      app-drawer {
+        --app-drawer-content-container: {
+          background-color: var(--primary-background-color);
+        };
       }
 
       .drawer-list {
         margin: 0 20px;
       }
 
-      .drawer-list a {
-        display: block;
+      .navlink {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
         padding: 0 16px;
         text-decoration: none;
         color: var(--app-secondary-color);
-        line-height: 40px;
+        font-family: 'Roboto', 'Noto', sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 24px;
+        min-height: 48px;
+        padding: 0 16px;
+      }
+      .drawer-list iron-icon {
+        margin-right: 23px;
+        opacity: 0.54;
       }
 
       .drawer-list a.iron-selected {
         color: black;
         font-weight: bold;
+      }
+      
+      #eltoastnegativo{
+        --paper-toast-color: #FFF;
+        --paper-toast-background-color: #f66;
+      }
+      .pie{
+        font-size: .8em;
+        margin: 10px;
+        color: #757575;
+      }
+      .pie a {
+        color: var(--primary-color);
       }
     </style>
 
@@ -110,9 +170,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-drawer id="drawer">
         <app-toolbar>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="view1" href="/view1">View One</a>
-          <a name="view2" href="/view2">View Two</a>
-          <a name="view3" href="/view3">View Three</a>
+          <a name="home" href="/home" class="navlink">
+            <iron-icon icon="home"></iron-icon>
+            <span>Home</span>
+          </a>
+          <a name="generador" href="/generador" class="navlink">
+            <iron-icon icon="editor:mode-edit"></iron-icon>
+            <span>Generador</span>
+          </a>
         </iron-selector>
       </app-drawer>
 
@@ -124,8 +189,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
             <div main-title>Memes Rocks!!</div>
 
-            <login-users user="{{user}}"></login-users>
-            {{userData.name}}
+            <login-users user="{{user}}" user-data="[[userData]]"></login-users>
+            
           </app-toolbar>
         </app-header>
 
@@ -134,13 +199,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             attr-for-selected="name"
             fallback-selection="view404"
             role="main">
-          <my-view1 name="view1"></my-view1>
-          <my-view2 name="view2"></my-view2>
-          <my-view3 name="view3"></my-view3>
+          <my-home 
+            name="home"
+          ></my-home>
+          <my-generador 
+            name="generador"
+            user="[[user]]"
+          ></my-generador>
+          <my-meme 
+            name="meme"
+            user="[[user]]"
+            route="[[route]]"
+          ></my-meme>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
+
+    <paper-toast id="eltoast"></paper-toast>
+    <paper-toast id="eltoastnegativo"></paper-toast>
+
+    <memes-crud-borrar-dialogo
+      id="dialogoCrudBorrar"
+    ></memes-crud-borrar-dialogo>
+
   </template>
 
   <script>
@@ -162,6 +244,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           computed: 'fb__userOne(user.uid)'
         }
+      },
+
+      listeners: {
+        'feedback-positivo': 'feedbackPositivo',
+        'feedback-negativo': 'feedbackNegativo',
+        'borrar-meme': 'borrarMeme',
+        'login-success': 'loginSuccess'
       },
 
       ready: function() {
@@ -188,6 +277,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _showPage404: function() {
         this.page = 'view404';
+      },
+
+      feedbackPositivo: function(e, data) {
+        this.$.eltoast.text = data
+        this.$.eltoast.open();
+      },
+      feedbackNegativo: function(e, data) {
+        this.$.eltoastnegativo.text = data
+        this.$.eltoastnegativo.open();
+      },
+
+      loginSuccess: function() {
+        //this.$.elpush.requestPermission();
+      },
+
+      borrarMeme: function(e, data) {
+        this.$.dialogoCrudBorrar.open(data);
       },
     });
   </script>

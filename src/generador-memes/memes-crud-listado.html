@@ -1,0 +1,79 @@
+
+<link rel="import" href="memes-crud-linea.html">
+
+<dom-module id="memes-crud-listado">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+      memes-crud-linea {
+        background: #f7f7f7;
+      }
+      memes-crud-linea:nth-child(even) {background: var(--light-primary-color)}
+      .noitems{
+        padding: 15px;
+        margin: 10px 35px;
+        color: #39c;
+        background-color: #9df;
+        font-size: .8em;
+        text-align: center;
+        border: 1px solid #ccc;
+      }
+    </style>
+    
+    <template is="dom-if" if="[[showMsgNoMemes]]">
+      <div class="noitems" hidden$="">
+        <p>No has creado memes todavía, pulsa el botón 
+        <iron-icon icon="add"></iron-icon>
+        "nuevo"</p>
+      </div>
+    </template>
+
+    <template is="dom-repeat" items="[[memesUser]]">
+      <memes-crud-linea 
+        meme="[[item]]"
+        user="[[user]]"
+      ></memes-crud-linea>
+    </template>
+  </template>
+  <script>
+    Polymer({
+      is: 'memes-crud-listado',
+
+      properties: {
+        memesUser: Array,
+        user: Object,
+        showMsgNoMemes: {
+          type: Boolean,
+          value: false
+        },
+        timeToShow: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      observers: ['testNumMemes(memesUser.length)'],
+
+      ready: function() {
+        var that = this;
+        this.async(function() {
+          that.timeToShow = true;
+          that.testNumMemes();
+        }, 2500);
+      },
+
+      testNumMemes: function() {
+        if(!this.memesUser) {
+          return false;
+        }
+        if(!this.memesUser.length && this.timeToShow) {
+          this.showMsgNoMemes = true;
+        } else {
+          this.showMsgNoMemes = false;          
+        }
+      }
+    });
+  </script>
+</dom-module>

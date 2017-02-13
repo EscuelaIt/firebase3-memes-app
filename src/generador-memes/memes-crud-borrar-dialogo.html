@@ -1,0 +1,64 @@
+
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+
+
+<dom-module id="memes-crud-borrar-dialogo">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      #dialogo {
+        width: 300px;
+        background-color: #ddd;
+      }
+    </style>
+    <style include="shared-styles"></style>
+
+    <paper-dialog id="dialogo">
+        <paper-dialog-scrollable>
+          <h1 class="titadmin">Borrar [[que]]?</h1>
+          <p>A borrar: <b>[[descrip]]</b></p>
+        </paper-dialog-scrollable>
+        <p class="buttons">
+          <paper-button dialog-dismiss class="bpositivo">No borrar</paper-button>
+          <paper-button dialog-confirm class="bnegativo">Borrar</paper-button>
+        </p>
+    </paper-dialog>
+
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'memes-crud-borrar-dialogo',
+
+      properties: {
+        que: String,
+        descrip: String,
+        item: Object
+      },
+
+      listeners: {
+        'iron-overlay-closed': 'gestionarCierre'
+      },
+
+      open: function(data) {
+        //console.log('vot a abrir el dialogo', this.$.dialogo);
+        this.que = data.name;
+        this.descrip = data.$key;
+        this.item = data;
+        this.$.dialogo.open();
+      },
+
+      gestionarCierre: function(e) {
+        if(!e.detail.canceled && e.detail.confirmed) {
+          this.fire('iron-signal', {name: 'crudborrar', data: this.item})
+        }
+      }
+    });
+  })();
+  </script>
+</dom-module>

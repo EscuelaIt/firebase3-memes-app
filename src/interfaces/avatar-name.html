@@ -1,0 +1,57 @@
+
+<dom-module id="avatar-name">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+      }
+      .capsula{
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        border-radius: 24px;
+        padding: 3px 15px 3px 10px;
+        background-color: var(--color-fondo, #ddd);
+      }
+      span {
+        margin-left: 20px;
+        font-size: .85em
+      }
+    </style>
+    <firebase-document
+      path="[[locUserName]]"
+      data="{{authorName}}"
+    ></firebase-document>
+    <div class="capsula">
+      <imagen-avatar id="[[userId]]"></imagen-avatar> <span>[[displayName]]</span>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'avatar-name',
+
+      behaviors: [FirebaseBehavior],
+
+      properties: {
+        userId: String,
+        locUserName: {
+          type: String,
+          computed: 'fb__userName(userId)'
+        },
+        authorName: {
+          type: String,
+          observer: 'nameObserver',
+        },
+        displayName: {
+          type: String,
+          value: ''
+        }
+      },
+
+      nameObserver: function(name) {
+        if(typeof(name) == 'string') {
+          this.displayName = name;
+        }
+      }
+    });
+  </script>
+</dom-module>

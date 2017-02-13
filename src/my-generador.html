@@ -1,0 +1,136 @@
+
+<link rel="import" href="generador-memes/memes-crud-listado.html">
+<link rel="import" href="generador-memes/memes-crud-insertar.html">
+<link rel="import" href="generador-memes/memes-crud-editar.html">
+<link rel="import" href="generador-memes/memes-crud-borrar.html">
+<link rel="import" href="generador-memes/memes-crud-borrar-dialogo.html">
+
+<dom-module id="my-generador">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+      iron-pages {
+        padding: 15px;
+      }
+      .nosesion {
+        padding: 15px;
+        margin: 10px 50px 0;
+        color: #c33;
+        background-color: #fcc;
+        font-size: .8em;
+        text-align: center;
+        border: 1px solid #ccc;
+      }
+      .nosesion p {
+        margin: 5px;
+      }
+      .nover{
+        display: none;
+      }
+    </style>
+
+    <firebase-query
+      path="[[locMemesUser]]"
+      data="{{memesUser}}"
+      order-by-child="timestamp"
+    ></firebase-query>
+
+    <div class="contenedor">
+      <app-toolbar>
+        <div main-title>Generar memes</div>
+        <paper-icon-button icon="add" on-tap="add" class="onlysmall"></paper-icon-button>
+
+        <paper-button class="onlybig" on-tap="add">
+          <iron-icon icon="add"></iron-icon>
+          <span>Nuevo</span>
+        </paper-button>
+
+      </app-toolbar>
+
+      <div class="nosesion nover" id="msgsesion" hidden$="[[user]]">
+        <p>
+          Para generar memes debes iniciar sesión en la aplicación.
+        </p>
+        <p>
+          Inicia sesión con el botón <iron-icon icon="account-circle"></iron-icon> de arriba a la derecha
+        </p>
+      </div>
+
+      <iron-pages selected="{{seccion}}" attr-for-selected="name">
+        <memes-crud-listado
+          name="listado"
+          memes-user="[[memesUser]]"
+          user="[[user]]"
+        ></memes-crud-listado>
+        <memes-crud-insertar
+          id="elinsertar"
+          name="insertar"
+          user="[[user]]"
+        ></memes-crud-insertar>
+        <memes-crud-editar
+          id="eleditar"
+          name="editar"
+          user="[[user]]"
+        ></memes-crud-editar>
+      </iron-pages>
+
+    </div>
+
+    <memes-crud-borrar
+      id="elborrar"
+      user="[[user]]"
+    ></memes-crud-borrar>
+  </template>
+  <script>
+    Polymer({
+      is: 'my-generador',
+
+      behaviors: [FirebaseBehavior],
+
+      properties: {
+        user: Object,
+        seccion: {
+          type: String,
+          value: 'listado'
+        },
+        locMemesUser: {
+          type: String,
+          computed: 'fb__memesUserAll(user.uid)'
+        },
+        memesUser: Array,
+
+      },
+
+      listeners: {
+        'volver-listado': 'irListado',
+        'editar-meme': 'editarMeme',
+      },
+
+      ready: function() {
+        this.async(this.mostrarMensajeLogueo, 2000);
+      },
+
+      mostrarMensajeLogueo: function() {
+        this.toggleClass('nover', false, this.$.msgsesion);
+      },
+
+      add: function() {
+        this.$.elinsertar.resetItem();
+        this.seccion = 'insertar';
+      },
+
+      irListado: function() {
+        this.seccion = 'listado';
+      },
+
+      editarMeme: function(e, meme) {
+        this.$.eleditar.item = meme;
+        this.seccion = 'editar';
+      },
+
+
+    });
+  </script>
+</dom-module>

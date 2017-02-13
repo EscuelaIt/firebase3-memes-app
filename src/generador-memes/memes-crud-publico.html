@@ -1,0 +1,108 @@
+
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+
+<dom-module id="memes-crud-publico">
+  <template>
+    <style>
+      :host {
+        display: block;
+        
+      }
+      paper-toggle-button {
+        font-size: .9em;
+        --paper-toggle-button-label-color: #666;
+      }
+    </style>
+    <!--<firebase-document
+      path="[[locMeme]]"
+      data="{{meme}}"
+    ></firebase-document>-->
+    <firebase-document
+      path="[[locRequestPublic]]"
+      data="{{requestPublic}}"
+    ></firebase-document>
+    <firebase-document
+      path="[[locRequestPrivate]]"
+      data="{{requestPrivate}}"
+    ></firebase-document>
+    <paper-toggle-button 
+      id="eltoggle" 
+      on-change="gestionCambio"
+    >Meme público</paper-toggle-button>
+  </template>
+  <script>
+    Polymer({
+      is: 'memes-crud-publico',
+
+      behaviors: [FirebaseBehavior, EmisorFeedbackBehavior],
+
+      properties: {
+        meme: {
+          type: Object,
+          observer: 'marcarToggle'
+        },
+        user: Object,
+        locRequestPublic: {
+          type: String,
+          computed: 'fb__requestPublicMemeUser(user.uid)'
+        },
+        requestPublic: Object,
+        locRequestPrivate: {
+          type: String,
+          computed: 'fb__requestPrivateMemeUser(user.uid)'
+        },
+        requestPrivate: Object
+      },
+
+      marcarToggle: function(meme) {
+        //console.log('memeObserver: ', meme.name, meme.isPublic);
+        if(meme && meme.isPublic) {
+          this.$.eltoggle.checked = true;
+        } else {
+          this.$.eltoggle.checked = false;          
+        }
+      },
+
+      gestionCambio: function() {
+        console.log('gestion cambio')
+        //miro si hay un request ya solicitado
+        if(this.$.eltoggle.checked) {
+          //se ha activado, luego tengo que solicitar un meme publico
+          this.requestMemePublication();
+        } else {
+          this.requestMemePrivatization();
+        }
+      },
+
+      requestMemePublication: function() {
+        console.log('requestPublic:', this.requestPublic)
+        if(this.hasRequestQueued()) {
+          return false;
+        }
+        //console.log('gestion cambio', this.$.eltoggle.active)
+        this.set('requestPublic.slug', this.meme.$key);
+      },
+
+      requestMemePrivatization: function() {
+        console.log('requestPrivate:', this.requestPrivate)
+        if(this.hasRequestQueued()) {      
+          return false;
+        }
+        //console.log('gestion cambio', this.$.eltoggle.active)
+        this.set('requestPrivate', {
+          slug: this.meme.$key,
+          publicId: this.meme.publicId
+        });
+      },
+
+      hasRequestQueued: function() {
+        if((this.requestPrivate && this.requestPrivate.slug) || (this.requestPublic && this.requestPublic.slug)) {
+          this.feedbackNegativo('Ya hay una solicitud encolada');
+          this.marcarToggle(this.meme);
+          return true;
+        }
+        return false;
+      }
+    });
+  </script>
+</dom-module>

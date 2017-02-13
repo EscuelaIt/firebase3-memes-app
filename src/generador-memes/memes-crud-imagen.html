@@ -1,0 +1,130 @@
+
+<link rel="import" href="../utils/canvas-to-blob-library.html">
+
+<dom-module id="memes-crud-imagen">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      .imagen{
+        padding: 15px;
+        background: var(--light-primary-color);
+        border: 1px solid #ddd;
+        font-size: .9em;
+      }
+      canvas {
+        margin-top: 10px;
+        width: 450px;
+        height: 300px;
+      }
+      .contcanvas {
+        text-align: center;
+      }
+    </style>
+    <div class="imagen">
+      <span>Imagen:</span>
+      <input type="file" id="inputfile" on-change="loadImage">
+    </div>
+    <div class="contcanvas">
+      <canvas id="elcanvas">
+        Tu navegador no soporta canvas, no vas a poder generar los memes.
+      </canvas>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'memes-crud-imagen',
+
+      properties: {
+        texto: String,
+        blob: {
+          type: Object,
+          notify: true
+        }
+      },
+
+      ready: function() {
+        this.canvasToBlob();
+      },
+      
+      getCtx: function() {
+        return this.$.elcanvas.getContext('2d');
+      },
+
+      getCanvasDimensions: function() {
+        return {
+          width: this.$.elcanvas.width,
+          height: this.$.elcanvas.height
+        }
+      },
+      
+      loadImage: function() {
+        var that = this;
+        var reader = new FileReader();
+        reader.onload = function() {
+          var loadImg = reader.result;
+          var img = new Image();
+          img.onload = function(){
+            console.log('imagen cargada')
+            that.imageSrc = img;
+            that.writeImage();
+          }
+          img.src = loadImg;
+        }
+        reader.readAsDataURL(this.$.inputfile.files[0]);
+      },
+
+      writeImage: function() {
+        //console.log('writeImage')
+        var ctx = this.getCtx();
+        var dimensiones = this.getCanvasDimensions();        
+        if(this.imageSrc) {
+          //pinto la imagen
+          //console.log('pinto la imagen')
+          ctx.drawImage(this.imageSrc, 0, 0, dimensiones.width, dimensiones.height);
+        } else {
+          //pinto un rectangulo
+          //console.log('pinto rect')
+          
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, dimensiones.width, dimensiones.height);
+        }
+        //acabo pintando el texto
+        this.writeText(dimensiones, ctx);
+      },
+
+      writeText: function(dimensiones, ctx) {
+        ctx.lineWidth  = 4;
+        ctx.font = '20pt arial black';
+        ctx.strokeStyle = '#ffffff';
+        ctx.fillStyle = '#000000';
+        ctx.textAlign = 'center';
+        ctx.lineJoin = 'round';        
+        var texto = this.texto.toUpperCase();
+        var x = dimensiones.width / 2;
+        var y = dimensiones.height - dimensiones.height / 7.5;
+        ctx.strokeText(texto, x, y);
+        ctx.fillText(texto, x, y);
+        //convierto la imagen actual a un blob
+        this.canvasToBlob();
+      },
+
+      canvasToBlob: function() {
+        this.$.elcanvas.toBlob(this.saveBlob.bind(this));
+      },
+
+      saveBlob: function(blob) {
+        this.blob = blob;
+      },
+
+      borrarImagen: function() {
+        //console.log('voy a borrar la imagen')
+        var ctx = this.getCtx();
+        var dimensiones = this.getCanvasDimensions();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, dimensiones.width, dimensiones.height);
+      }
+    });
+  </script>
+</dom-module>

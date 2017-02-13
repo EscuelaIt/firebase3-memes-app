@@ -1,0 +1,86 @@
+
+<link rel="import" href="memes-crud-imagen.html">
+
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+
+
+<dom-module id="memes-crud-formulario">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      
+    </style>
+    
+    <paper-input 
+      id="namefield" 
+      label="Nombre" 
+      value="{{item.name}}" 
+      error-message="Requerido" 
+      required
+      auto-validate
+    ></paper-input>
+    <paper-input label="Descripción" value="{{item.description}}"></paper-input>
+    <template is="dom-if" if="[[!edicion]]">
+      <memes-crud-imagen
+        id="elimage"
+        texto="[[item.texto]]"
+        blob="{{blob}}"
+      ></memes-crud-imagen>
+      <paper-input label="Texto para la imagen" value="{{item.texto}}" on-keyup="writeImage"></paper-input>
+    </template>
+    <template is="dom-if" if="[[edicion]]">
+      <iron-image src="[[item.downloadURL]]"></iron-image>
+    </template>
+  </template>
+  <script>
+    Polymer({
+      is: 'memes-crud-formulario',
+
+      properties: {
+        item: {
+          type: Object,
+          notify: true,
+          value: function() {
+            return {}
+          }
+        },
+        blob: {
+          type: Object,
+          notify: true
+        },
+        edicion: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      resetItem: function() {
+        this.item = {
+          name: '',
+          description: '',
+          texto: ''
+        }
+        this.borrarImagen();
+      },
+      
+      isValid: function() {
+        //console.log(this.item)
+        if(this.item.name.length == 0) {
+          return false;
+        }
+        return true;   
+      },
+
+      writeImage: function() {
+        this.$$('#elimage').writeImage();
+      },
+
+      borrarImagen: function() {
+        this.$$('#elimage').borrarImagen();
+      }
+      
+    });
+  </script>
+</dom-module>

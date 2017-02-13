@@ -1,0 +1,151 @@
+
+<link rel="import" href="memes-crud-formulario.html">
+
+<link rel="import" href="../utils/string-to-slug.html">
+<link rel="import" href="../utils/moment-element.html">
+
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+
+
+<dom-module id="memes-crud-insertar">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+      paper-progress {
+        width: 100%;
+        --paper-progress-height: 10px;
+      }
+    </style>
+    <memes-crud-formulario 
+      id="form"
+      item="{{item}}"
+      blob="{{blob}}"
+    ></memes-crud-formulario>
+    <paper-progress 
+      hidden$="[[!loadingImage]]"
+      value="[[progreso]]"
+    ></paper-progress>
+    <p class="acciones">
+      <paper-button on-tap="cancelar">Cancelar</paper-button>
+      <paper-button on-tap="insertar">Insertar</paper-button>
+    </p>
+    <string-to-slug
+      string="[[item.name]]"
+      slug="{{slug}}"
+    ></string-to-slug>
+  </template>
+  <script>
+    Polymer({
+      is: 'memes-crud-insertar',
+
+      behaviors: [FirebaseBehavior, EmisorFeedbackBehavior],
+
+      properties: {
+        user: Object,
+        item: Object,
+        blob: Object,
+        slug: String,
+        slugUnico: String,
+        loadingImage: {
+          type: Boolean,
+          value: false
+        },
+        progreso: Number
+      },
+
+      cancelar: function() {
+        this.fire('volver-listado');
+      },
+
+      resetItem: function() {
+        this.$.form.resetItem();
+      },
+
+      insertar: function() {
+        // validaciones previas
+        if(! this.user) {
+          this.feedbackNegativo('Debes estar autenticado como usuario');
+          return false;
+        }
+        if(! this.$.form.isValid()){
+          this.feedbackNegativo('Hay errores en el formulario');
+          return false;
+        }
+        //validando que tengo el blob
+        if(this.blob) {
+          console.log('blob', this.blob);
+        } else {
+          this.feedbackNegativo('Ocurrió un problema al generar la imagen');
+          return false;
+        }
+
+        //voy a reformular el slug, para q sea único
+        var that = this;
+        var refMmemeExistente = this.fbref(this.fb__memesUserOne(this.user.uid, this.slug));
+        refMmemeExistente.once('value', function(ss) {
+          if(ss.val()) {
+            //encontré el slug repetido
+            that.slugUnico = that.slug + '-' + moment().format('x');
+          } else {
+            that.slugUnico = that.slug;
+          }
+          //console.log('slug unico' + that.slugUnico);
+          //that.item.slugUnico = that.slugUnico;
+          that.cargarImagen();
+        });
+      },
+
+      cargarImagen: function() {
+        this.progreso = 0;
+        this.loadingImage = true; // Muestra la barra de progreso
+        var refStorage = this.fbStorageRef(this.fs__memeImage(this.user.uid, this.slugUnico));
+
+        // procedimiento para subir el archibo
+        var uploadTask = refStorage.put(this.blob);
+        var that = this;
+        uploadTask.on('state_changed', 
+          function(ss) {
+            that.progreso = (ss.bytesTransferred / ss.totalBytes) * 100;
+          },function(error) {
+            //Gestiono un error de subida del archivo
+            that.feedbackNegativo('Error upload: ' + error.code);
+          }, function() {
+            that.async(that.ocultaProgress, 1000);
+            //upload completado
+            that.feedbackPositivo('Descarga subida');
+            that.progreso = 100;
+            that.item.downloadURL = uploadTask.snapshot.downloadURL;
+            that.almacenarMemeUser()
+          });
+      },
+
+      almacenarMemeUser: function(){
+        //datos adicionales de control del meme
+        this.item.timestamp =  moment().format('X');
+        this.item.timestamp = parseInt(this.item.timestamp);
+        this.item.isPublic = false;
+        var that = this;
+        var ref = this.fbref(this.fb__memesUserAll(this.user.uid)).child(this.slugUnico);
+        //console.log('voy a insertar: ', JSON.stringify(this.item))
+        ref.set(this.item)
+          .then(function() {
+            that.feedbackPositivo('Meme insertado en la base de datos');
+            that.resetItem();
+            that.fire('volver-listado');
+          })
+          .catch(function(err) {
+            // TODO:
+            // DEBERÍA BORRAR LA IMAGEN QUE NO HEMOS PODIDO INSERTAR COMO MEME
+            that.feedbackNegativo('Error al insertar el meme: ' + err);            
+          });
+      },
+
+      ocultaProgress: function() {
+        this.loadingImage = false;
+      }
+
+    });
+  </script>
+</dom-module>

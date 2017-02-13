@@ -1,0 +1,52 @@
+
+<link rel="import" href="../../bower_components/iron-signals/iron-signals.html">
+
+<dom-module id="memes-crud-borrar">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+      
+    </style>
+    
+    <iron-signals on-iron-signal-crudborrar="gestionarBorrado"></iron-signals>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'memes-crud-borrar',
+
+      behaviors: [FirebaseBehavior, EmisorFeedbackBehavior],
+
+      properties: {
+
+      },
+
+      gestionarBorrado: function(e, data) {
+        console.log('gestionar borrado', data);
+        var that = this;
+        var isPublic = data.isPublic || null;
+        var publicId = data.publicId || null;
+        var ref = this.fbref(this.fb__memesUserOne(this.user.uid, data.$key));
+        ref.remove()
+          .then(function() {
+            //ahora borro tb aparición en el listado general (SI HAY)
+            if(isPublic && publicId) {
+              var refGeneral = that.fbref(that.fb__memesOne(publicId)).child('deleted');
+              refGeneral.set(true)
+                .then(function() {
+                  that.feedbackPositivo('Elemento borrado y eliminado públicamente');
+                })
+            } else {
+              that.feedbackPositivo('Elemento borrado');
+            }
+          })
+          .catch(function() {
+            that.feedbackNegativo('Error en el borrado');
+          })
+      }
+
+    });
+  </script>
+</dom-module>
