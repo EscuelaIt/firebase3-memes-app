@@ -1,0 +1,111 @@
+
+<link rel="import" href="../behaviors/firebase-behavior.html">
+
+<dom-module id="notification-item">
+  <template>
+    <style>
+      :host {
+        display: block;
+        --paper-item-icon: {
+          width: var(--item-icon-width, 40px);
+          margin-left: 0;
+        };
+        --paper-item: {
+          padding: 0;
+          margin: 0;
+          font-size: var(--item-font, 0.8em);
+        };
+        --paper-item-body-secondary: {
+          font-size: 1.1em;
+        }
+  
+      }
+      imagen-avatar{
+        --avatar-width: 28px;
+        --avatar-height: 28px;
+      }
+      .idelete {
+        --iron-icon-width: 16px;
+        --iron-icon-height: 16px;
+        margin-left: 5px;
+      }
+      .link {
+        color: var(--primary-color);
+      }
+      .pointer {
+        cursor: pointer;
+      }
+      .dwicon {
+        color: #666;
+      }
+    </style>
+    <paper-icon-item id="not">
+      <imagen-avatar id="[[notification.user]]" item-icon></imagen-avatar>
+      <paper-item-body two-line>
+        <div id="body">[[notification.text]]</div>
+        <div secondary>
+          [[desde]]
+        </div>
+      </paper-item-body>
+      <iron-icon class="idelete" icon="close" on-tap="borrarNotificacion"></iron-icon>
+    </paper-icon-item>
+
+    <a 
+      id="link"
+      href$="[[notification.link]]" 
+      hidden$="[[true]]"
+    ></a>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'notification-item',
+
+      behaviors: [FirebaseBehavior],
+
+      properties: {
+        notification: {
+          type: Object,
+          observer: 'notifObserver'
+        },
+        desde: {
+          type: String,
+          computed: '_desde(notification.timestamp)'
+        },
+        user: Object
+      },
+
+      listeners: {
+        'tap': 'irA'
+      },
+
+      notifObserver: function(notif) {
+        //console.log(notif)
+        if(notif && notif.link) {
+          this.toggleClass('link', true, this.$.body);
+          this.toggleClass('pointer', true, this.$.not);          
+        } else {
+          this.toggleClass('link', false, this.$.body)
+          this.toggleClass('pointer', false, this.$.not);          
+        }
+      },
+
+      irA: function() {
+        if(this.notification.link) {
+          this.fire('cerrar-drop');
+          this.$.link.click();
+        }
+      },
+
+      borrarNotificacion: function(e) {
+        e.stopPropagation();
+        var refNotif = this.fbref( this.fb__notificationsUserOne(this.user.uid, this.notification.$key));
+        refNotif.remove();
+      },
+
+      _desde: function(time) {
+        return moment.unix(time).fromNow();
+      }
+    });
+  </script>
+</dom-module>

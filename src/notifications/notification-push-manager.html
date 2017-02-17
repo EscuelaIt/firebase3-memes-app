@@ -1,0 +1,63 @@
+
+<link rel="import" href="../../bower_components/polymerfire/firebase-messaging.html">
+
+
+<dom-module id="notification-push-manager">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <firebase-messaging id="messaging"
+      token="{{token}}"
+      active="{{isActive}}"
+      on-message="handleMessage"
+    ></firebase-messaging>
+  </template>
+  <script>
+    Polymer({
+      is: 'notification-push-manager',
+
+      behaviors: [FirebaseBehavior, EmisorFeedbackBehavior],
+
+      properties: {
+        user: Object,
+        token: String,
+        active: Boolean
+      },
+
+      observers: [
+        'saveToken(token, user)'
+      ],
+
+      requestPermission: function() {
+        var that = this;
+        this.$.messaging.requestPermission().then(function() {
+          that.feedbackPositivo('Permiso concedido');
+        }, function(err) {
+          that.feedbackNegativo('Permiso no concedido');
+        });
+      },
+
+      saveToken: function(token, user) {
+        var that = this;
+        if(token && user) {
+          var ref = this.fbref(this.fb__notificationTokenUser(user.uid));
+          ref.set(token)
+            .then(function() {
+              //console.log('almacenado')
+            })
+            .catch(function() {
+              //console.log('no almacenado')
+            })
+        }
+      },
+
+      handleMessage: function(e, data) {
+        var no = data.message.notification;
+        this.feedbackPositivo(no.title);
+      }
+    });
+  </script>
+</dom-module>

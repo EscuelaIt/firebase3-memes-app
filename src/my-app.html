@@ -64,6 +64,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="./login/login-users.html">
 
 
+<link rel="import" href="notifications/notification-advisor.html">
+<link rel="import" href="notifications/notification-push-manager.html">
+
 
 
 <dom-module id="my-app">
@@ -158,6 +161,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       data="{{userData}}"
     ></firebase-document>
 
+    <notification-push-manager
+      id="elpush"
+      user="[[user]]"
+    ></notification-push-manager>
+
     <app-location route="{{route}}"></app-location>
     <app-route
         route="{{route}}"
@@ -190,7 +198,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div main-title>Memes Rocks!!</div>
 
             <login-users user="{{user}}" user-data="[[userData]]"></login-users>
-            
+            <notification-advisor user="{{user}}"></notification-advisor>
           </app-toolbar>
         </app-header>
 
@@ -289,12 +297,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       loginSuccess: function() {
-        //this.$.elpush.requestPermission();
+        this.$.elpush.requestPermission();
       },
 
       borrarMeme: function(e, data) {
         this.$.dialogoCrudBorrar.open(data);
       },
+
+      
     });
   </script>
 </dom-module>

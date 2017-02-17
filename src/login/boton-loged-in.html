@@ -3,6 +3,8 @@
 <link rel="import" href="../styles/dropdown-styles.html">
 <link rel="import" href="../behaviors/dropdown-behavior.html">
 
+<link rel="import" href="../interfaces/imagen-avatar.html">
+
 
 
 <dom-module id="boton-loged-in">
@@ -23,8 +25,8 @@
       }
 
     </style>
-    <paper-icon-button icon="icons:exit-to-app" on-tap="abrirDrop"></paper-icon-button>
-    
+    <imagen-avatar imagen="[[userData.avatar]]" on-tap="abrirDrop"></imagen-avatar>
+
     <iron-dropdown horizontal-align="right"
       horizontal-align="right"
       vertical-align="top"

@@ -1,0 +1,210 @@
+
+<link rel="import" href="notification-item.html">
+
+<link rel="import" href="../../bower_components/paper-badge/paper-badge.html">
+
+<dom-module id="notification-advisor">
+  <template>
+    <style include="dropdown-styles"></style>
+
+    <style include="shared-styles">
+      :host {
+        display: inline-block;
+      }
+      h2{
+        font-size: 1em;
+        margin: 0;
+        background-color: var(--primary-color);
+        color: #fff;
+        padding: 3px 8px;
+        border-radius: 5px;
+      }
+      #notificon {
+        color: #fff;
+        --iron-icon-width: 20px;
+        --iron-icon-height: 20px;
+      }
+      #notifcircle{
+        width: 28px;
+        height: 28px;
+        border-radius: 14px;
+        background-color: var(--accent-color);
+        line-height: 28px;
+        text-align: center;
+        box-shadow: 1px 1px 1px #000;
+        position: relative;
+        top: 2px;
+        margin-left: 10px;
+      }
+      .cargando {
+        text-align: center;
+        padding: 10px 0 20px 0;
+      }
+      .cargando p {
+        margin: 15px 0px 10px 15px;
+        width: 200px;
+      }
+      dw-notification-item {
+        border-bottom: 1px solid #ccc;
+        padding: 0 2px;
+      }
+      dw-notification-item:last-child {
+        border: none;
+      }
+      .opcionesdrop {
+        padding: 0;
+      }
+      .dialogodrop {
+        padding: 5px;        
+      }
+      .contmanuales {
+        margin: 10px 0 0 10px;
+        font-size: .8em;
+      }
+      .contmanuales p {
+        margin: 10px 0 0 0;
+        text-align: left;
+      }
+      .contmanuales a {
+        color: var(--primary-color);
+        padding: 3px 0;
+      }
+      paper-badge {
+        --paper-badge-background: #c33;
+      }
+    </style>
+
+    <firebase-query
+      path="[[locNotification]]"
+      data="{{notifications}}"
+    ></firebase-query>
+
+    <div id="notifcircle" hidden="[[!user]]">
+      <iron-icon icon="social:notifications" id="notificon"></iron-icon>
+      <paper-badge hidden$="[[!sinLeer]]" label="[[sinLeer]]" for="notificon"></paper-badge>
+    </div>
+    
+    <!-- ventana de notificaciones -->
+    <iron-dropdown
+      id="mydrop"
+      horizontal-align="right"
+      vertical-align="top"
+      vertical-offset="0"
+      open-animation-config="[[animacionEntrada]]"
+      close-animation-config="[[animacionSalida]]"
+    >
+      <div class="dropdown-content dialogodrop">
+        <div class="opcionesdrop">
+
+          <h2 hidden="[[cargando]]">Notificaciones:</h2>
+          
+          <div class="cargando" hidden$="[[!cargando]]">
+            <p>
+              {{mensajeSinNotif}}
+            </p>
+            <paper-spinner active id="elspinner"></paper-spinner>
+          </div>
+          
+          <template is="dom-repeat" items="[[notifications]]" as="notification">
+            <notification-item  user="[[user]]" notification="[[notification]]"></notification-item>
+          </template>
+
+          
+        </div>
+      </div>
+    </iron-dropdown>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'notification-advisor',
+
+      behaviors: [FirebaseBehavior, DropdownBehavior],
+
+      properties: {
+        user: Object,
+        notifications: {
+          type: Array,
+        },
+        locNotification: {
+          type: String,
+          computed: 'fb__notificationsUser(user.uid)'
+        },
+        mensajeSinNotif: {
+          type: String,
+          value: 'Si tienes notificaciones aparecerán aquí'
+        },
+        cargando: {
+          type: Boolean,
+          value: true
+        },
+        sinLeer: {
+          type: Number,
+          value: 0
+        },
+      },
+
+      listeners: {
+        'cerrar-drop': 'cerrarDrop',
+        'notifcircle.tap': 'openDrop'
+      },
+
+      observers: ['notifObserver(notifications.splices)'],
+
+      ready: function() {
+        this.async(this.paraSpinner, 10000);
+        this.async(this.cambiaMensaje, 15000);
+      },
+
+      paraSpinner: function() {
+        this.$.elspinner.active = false;
+      },
+
+      cambiaMensaje: function() {
+        this.mensajeSinNotif = "Sin notificaciones";
+      },
+
+      openDrop: function() {
+        this.$.mydrop.open();
+        //marcar ya leidas en el componente y Firebase
+        this.async(this.marcarYaLeidas, 3000);
+      },
+
+      marcarYaLeidas: function() {
+        var that = this;
+        this.sinLeer = 0;
+        this.notifications.forEach(function(item) {
+          //console.log(that.fb__notifUserOne(that.user.uid, item.$key));
+          var refNotif = that.fbref(that.fb__notificationsUserOne(that.user.uid, item.$key));
+          refNotif.child('read').set(true);
+        })
+      },
+      
+      notifObserver: function(chr) {
+        var that = this;
+        //console.log('sin leer', that.sinLeer)
+        if(chr) {
+          chr.indexSplices.forEach(function(s) {
+            for (var i=0; i<s.addedCount; i++) {
+              var index = s.index + i;
+              var newNotif = s.object[index];
+              //console.log(newNotif)
+              if(!newNotif.read) {
+                //console.log('no es leida, incremento', newNotif.read)
+                that.sinLeer ++;
+              }
+              //console.log('notif ' + newNotif.body + ' added at index ' + index);
+            }
+          })
+          //console.log('obs', chr)
+          this.async(this.resizeDrop, 500);
+          this.cargando = false;
+        }
+      },
+
+      resizeDrop: function(){
+        this.$.mydrop.notifyResize()
+      }
+    });
+  </script>
+</dom-module>
