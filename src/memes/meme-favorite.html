@@ -1,0 +1,75 @@
+
+<dom-module id="meme-favorite">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: inline-block;
+      }
+      iron-icon {
+        color: #999;
+      }
+      .favorite {
+        color: var(--accent-color);
+      }
+    </style>
+    <firebase-document
+      path="[[locFav]]"
+      data="{{fav}}"
+    ></firebase-document>
+    <paper-button on-tap="favorite" class="iteraccionbutton">
+      <iron-icon icon="star" id="favicon"></iron-icon>
+       <span>Favorito</span>
+    </paper-button>
+    
+  </template>
+  <script>
+    Polymer({
+      is: 'meme-favorite',
+
+      behaviors: [FirebaseBehavior, EmisorFeedbackBehavior],
+
+      properties: {
+        user: Object,
+        memeLocData: Object,
+        locFav: {
+          type: String,
+          computed: 'fb_favMemeUser(user.uid, memeLocData)'
+        },
+        fav: {
+          type: Object,
+          observer: 'favObserver'
+        }
+      },
+
+      favObserver: function(fav) {
+        if(fav && fav.isFav) {
+          this.toggleClass('favorite', true, this.$.favicon);
+        } else {
+          this.toggleClass('favorite', false, this.$.favicon);
+        }
+      },
+
+      favorite: function() {
+        if(!this.user) {
+          this.feedbackNegativo('Necestias ser usuario para marcar como favorito');
+          return false;
+        }
+        if(this.fav && this.fav.isFav) {
+          this.set('fav.isFav', null);
+          this.fire('minus-num-favs');          
+        } else {
+          this.set('fav.isFav', true);
+          this.fire('add-num-favs');
+          //voy a requerir una notificación
+          var refNotif = this.fbref(this.fb_notificationRequest(this.user.uid));
+          refNotif.set({
+            slug: this.memeLocData.slug,
+            userId: this.memeLocData.userId,
+            type: 'meme_fav'
+          });
+        }
+      }
+
+    });
+  </script>
+</dom-module>

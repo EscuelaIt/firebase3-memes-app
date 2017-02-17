@@ -1,0 +1,90 @@
+
+<dom-module id="meme-twitter-share">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: inline-block;
+      }
+    </style>
+    <firebase-document
+      path="[[locTwitterShareRequest]]"
+      data="{{requestTwitter}}"
+    ></firebase-document>
+    <firebase-document
+      path="[[locTwitterShareResponse]]"
+      data="{{responseTwitter}}"
+    ></firebase-document>
+    <paper-button on-tap="tuitear" class="iteraccionbutton">
+      <iron-icon icon="rrss:twitter"></iron-icon>
+      <span>Tuitear el meme</span></paper-button>
+  </template>
+  <script>
+    Polymer({
+      is: 'meme-twitter-share',
+
+      behaviors: [FirebaseBehavior, EmisorFeedbackBehavior],
+
+      properties: {
+        user: Object,
+        locTwitterShareRequest: {
+          type: String,
+          computed: 'fb_twitterShareRequestUser(user.uid)'
+        },
+        requestTwitter: Object,
+        locTwitterShareResponse: {
+          type: String,
+          computed: 'fb_twitterShareResponseUser(user.uid)'
+        },
+        responseTwitter: Object,
+        userId: String,
+        slug: String,
+        waitingForResponse: {
+          type: Boolean,
+          value: false
+        },
+
+      },
+
+      observers: [
+        'getResponse(responseTwitter)'
+      ],
+
+      tuitear: function() {
+        if(!this.user) {
+          this.feedbackNegativo('Debes ser usuario y loguearte con Twitter para esta funcionalidad');
+          return false;
+        }
+        if(this.user.providerData[0].providerId != 'twitter.com') {
+          this.feedbackNegativo('Debes loguearte con Twitter para esta funcionalidad');          
+          return false;
+        }
+        if(this.requestTwitter && this.requestTwitter.slug) {
+          this.feedbackNegativo('Hay otra solicitud encolada');          
+          return false;
+        }
+        var requestObject = {
+          userId: this.userId,
+          slug: this.slug,
+        }
+        this.set('requestTwitter', requestObject);
+        this.waitingForResponse = true;
+      },
+
+      getResponse: function(res) {
+        if(res && res.msg && this.waitingForResponse) {
+          if(res.error) {
+            this.feedbackNegativo(res.msg)
+          } else {
+            this.feedbackPositivo(res.msg)
+          }
+          this.deleteResponse();
+        }
+      },
+
+      deleteResponse: function() {
+        var ref = this.fbref(this.fb_twitterShareResponseUser(this.user.uid));
+        ref.remove();
+      }
+    });
+  </script>
+</dom-module>

@@ -1,4 +1,9 @@
 
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="memes/meme-card.html">
+
+
 <dom-module id="my-home">
   <template>
     <style include="shared-styles">
@@ -35,13 +40,50 @@
         @apply(--layout-wrap);
       }
     </style>
+
+    <firebase-query
+      path="[[locMemesAll]]"
+      data="{{memes}}"
+      limit-to-last="20"
+
+    ></firebase-query>
     <div class="contenedor">
-      <h1>Home</h1>
+      <div class="banner">
+        <h1>
+          Generador de Memes
+        </h1>
+        <p>Genera tus memes y comparte con el mundo</p>
+      </div>
+
+      <app-toolbar>
+        <div main-title>Algunos memes de los usuarios</div>
+      </app-toolbar>
+
+      <div class="memes">
+        <template is="dom-repeat" items="[[memes]]" as="meme">
+          <meme-card
+            meme-global="[[meme]]"
+          ></meme-card>
+        </template>
+      </div>
+
     </div>
   </template>
+
   <script>
     Polymer({
-      is: 'my-home'
+      is: 'my-home',
+
+      behaviors: [FirebaseBehavior],
+
+      properties: {
+        locMemesAll: {
+          type: String,
+          value: function() {
+            return this.fb__memesAll();
+          }
+        }
+      }
     });
   </script>
 </dom-module>

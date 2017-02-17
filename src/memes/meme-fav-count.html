@@ -1,0 +1,37 @@
+
+<link rel="import" href="../../bower_components/paper-badge/paper-badge.html">
+
+<dom-module id="meme-fav-count">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+      }
+    </style>
+    
+    <iron-icon icon="star" id="ico"></iron-icon>
+    <paper-badge for="ico" label="[[displayCount]]"></paper-badge>
+    
+  </template>
+  <script>
+    Polymer({
+      is: 'meme-fav-count',
+
+      properties: {
+        displayCount: {
+          type: Number,
+          value: 0
+        },
+        count: {
+          type: Number, 
+          observer: 'countObserver',
+        }
+      },
+
+      countObserver: function(count) {
+        //console.log(count)
+        this.displayCount = (!count)? 0 : count;
+      }
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,90 @@
+
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+
+<link rel="import" href="meme-fav-count.html">
+
+<dom-module id="meme-card">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        width: 200px;
+        margin: 10px;
+      }
+      h2 {
+        font-weight: normal;
+        color: var(--primary-color);
+        margin: 0;
+        font-size: 1em;
+      }
+      paper-button span {
+        margin-left: 3px;
+      }
+      @media(min-width: 600px) {
+        :host {
+          width: 250px;
+        }
+      }
+      
+      @media(min-width: 950px) {
+        :host {
+          width: 300px;
+        }
+        h2 {
+          font-size: 1.3em;
+        }
+      }
+      @media(max-width: 650px) {
+        .card-actions {
+          font-size: .9em;
+        }
+      }
+    </style>
+    <firebase-document
+      path="[[locMeme]]"
+      data="{{memeData}}"
+    ></firebase-document>
+    
+    <paper-card heading="" image="[[memeData.downloadURL]]" elevation="1" animated-shadow="false">
+      <div class="card-content">
+        <a href$="[[urlMeme]]" class="linkherit">
+          <h2>[[memeData.name]]</h2>
+        </a>
+      </div>
+      <div class="card-actions">
+        <a href$="[[urlMeme]]" class="linkherit">
+          <paper-icon-button icon="open-in-browser">
+          </paper-icon-button>
+          <meme-fav-count
+            count="[[memeGlobal.numFavs]]"
+          ></meme-fav-count>
+        </a>
+      </div>
+    </paper-card>
+    
+  </template>
+  <script>
+    Polymer({
+      is: 'meme-card',
+      
+      behaviors: [FirebaseBehavior],
+
+      properties: {
+        locMeme: String,
+        memeData: Object,
+        memeGlobal: Object,
+        urlMeme: String
+      },
+
+      observers: ['getLocMeme(memeGlobal)'],
+
+      getLocMeme: function(mg) {
+        //console.log('getLocMeme',mg)
+        this.locMeme = this.fb__memesUserOne(mg.userId, mg.slug);
+        this.urlMeme = '/meme/' + mg.userId + '/' + mg.slug + '/';
+      },
+
+      
+    });
+  </script>
+</dom-module>

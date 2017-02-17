@@ -1,0 +1,229 @@
+
+<link rel="import" href="meme-twitter-share.html">
+<link rel="import" href="meme-favorite.html">
+
+<link rel="import" href="meme-fav-users.html">
+
+<link rel="import" href="../interfaces/avatar-name.html">
+
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+
+
+<dom-module id="meme-detail">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+      .cuerpo {
+        margin-bottom: 15px;      
+      }
+      .lateral p{
+        color: #999; 
+      }
+      .imagen {
+        display: inline-block;
+      }
+      .interaccion {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-justified);
+        margin-bottom: 15px;
+        padding: 12px;
+        background-color: var(--primary-color);
+        border-radius: 5px;
+      }
+      .url {
+        padding: 15px;
+        background-color: #f5f5f5;
+        border: 1px solid var(--accent-color);
+        font-size: .9em;
+      }
+      .url span{
+        display: block;
+        margin-top: 5px;
+        font-size: .85em;
+        font-family: monospace;
+        padding: 7px 15px;
+        background-color: #fff;
+        overflow: auto;
+      }
+      .card {
+        padding: 15px 10px;        
+        background-color: #fff;
+        box-shadow: 2px 2px 2px #ccc;
+      }
+      .enlacetool{
+        color: #fff;
+      }
+      iron-image {
+        --iron-image-width: 100%;
+      }
+      @media(min-width: 510px) and (max-width: 640px) {
+        .cuerpo {
+          @apply(--layout-horizontal);
+        }
+        .lateral {
+          margin-left: 20px;
+        }
+      }
+      @media(min-width: 790px) {
+        .cuerpo {
+          @apply(--layout-horizontal);
+        }
+        .lateral {
+          margin-left: 20px;
+        }
+      }
+      @media(min-width: 390px) {
+        .imagen {
+          padding: 15px;
+          background: var(--primary-background-color);
+          border: 1px solid var(--primary-color);
+        }
+      }
+      @media(min-width: 350px) {
+        .card {
+          padding: 15px;
+          margin: 15px;
+        }
+      }
+      h3{
+        font-weight: normal;
+        font-size: .9em;
+        color: var(--primary-color);
+        margin: 0 0 6px 0;
+        padding-bottom: 2px;
+        border-bottom: 1px solid #ddd;
+      }
+      .autor {
+        margin-bottom: 15px;
+      }
+    </style>    
+    <firebase-document
+      path="[[locMeme]]"
+      data="{{memeData}}"
+    ></firebase-document>
+    <div class="contenedor">
+      <app-toolbar>
+        
+        <a href="/home/" class="enlacetool">
+          <paper-icon-button icon="arrow-back"></paper-icon-button>
+        </a>
+        
+        <div main-title>[[memeData.name]]</div>
+      </app-toolbar>
+
+      <div class="card">
+        <div class="cuerpo">
+          <div class="imagen">
+            <iron-image src="[[memeData.downloadURL]]" preload></iron-image>
+          </div>
+          <div class="lateral">
+            <p>
+              [[memeData.description]]
+            </p>
+            <!--<meme-fav-users
+              meme-loc-data=[[memeLocData]]
+              meme-data="[[memeData]]"
+            ></meme-fav-users>-->
+            <div id="favuserselement"></div>
+          </div>
+        </div>
+        <template is="dom-if" if="[[memeData.isPublic]]">
+          <div class="interaccion">
+            
+            <meme-favorite
+              user="[[user]]"
+              meme-loc-data=[[memeLocData]]
+            ></meme-favorite>
+            <meme-twitter-share
+              user="[[user]]"
+              user-id="[[memeLocData.userId]]"
+              slug="[[memeLocData.slug]]"
+            ></meme-twitter-share>
+            
+          </div>
+        </template>
+        <div class="autor">
+          <h3>Autor</h3>
+          <avatar-name user-id="[[memeLocData.userId]]"></avatar-name>
+        </div>
+        <div class="url">
+          URL pública del meme:
+          <span>[[memeData.downloadURL]]</span>
+        </div>
+      </div>
+
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'meme-detail',
+
+      behaviors: [FirebaseBehavior],
+
+      properties: {
+        user: Object,
+        memeLocData: Object,
+        locMeme: String,
+        memeData: Object,
+        delayFavUsers: Object
+      },
+
+      observers: [
+        'getLocMeme(memeLocData)',
+        'createFavUsers(memeData, memeLocData)'
+      ],
+
+      listeners: {
+        'add-num-favs': 'addNumFavs',
+        'minus-num-favs': 'minusNumFavs'
+      },
+
+      addNumFavs: function() {
+        this.changeNumFavs(1);
+      },
+      minusNumFavs: function() {
+        this.changeNumFavs(-1);
+      },
+      changeNumFavs: function(num) {
+        if(this.memeData && this.memeData.isPublic && this.memeData.publicId) {
+          //console.log(this.memeData.publicId);
+          var refNumFavs = this.fbref(this.fb__numFavs(this.memeData.publicId));
+          refNumFavs.once('value', function(ss) {
+            var numFavs = ss.val();
+            if(numFavs) {
+              numFavs += num;
+            } else if(num > 0) {
+              numFavs = 1;
+            }
+            refNumFavs.set(numFavs);
+          })
+        }
+
+      },
+
+
+      getLocMeme: function(locData) {
+        this.locMeme = this.fb__memesUserOne(locData.userId, locData.slug);
+      },
+
+      createFavUsers: function(memeData, memeLocData) {
+        if(memeData && memeData.isPublic && memeLocData) {
+          this.$.favuserselement.innerHTML = '';
+          if(this.delayFavUsers) this.cancelAsync(this.delayFavUsers);
+          this.delayFavUsers = this.async(this.createUsersFavElement, 500);
+        }
+      },
+
+      createUsersFavElement: function() {
+        var elem = document.createElement('meme-fav-users');
+        elem.setAttribute('id', 'elfavusers');
+        elem.memeData = this.memeData;
+        elem.memeLocData = this.memeLocData;
+        this.$.favuserselement.append(elem);
+      }
+
+    });
+  </script>
+</dom-module>
