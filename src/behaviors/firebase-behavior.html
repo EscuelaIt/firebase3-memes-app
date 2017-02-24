@@ -20,6 +20,14 @@ FirebaseBehavior = {
     return this.fbapp.database().ref(ruta);
   },
 
+  // devuelve auth service
+  fbauth: function() {
+    if(!this.fbapp) {
+      this.fbapp = this.getFbapp();
+    }
+    return this.fbapp.auth();
+  },
+
   // USERS
   fb__userAll: function() {
     return '/users';

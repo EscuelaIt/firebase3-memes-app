@@ -2,6 +2,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
 <link rel="import" href="memes/meme-card.html">
+<link rel="import" href="login/custom-token.html">
 
 
 <dom-module id="my-home">
@@ -66,7 +67,7 @@
           ></meme-card>
         </template>
       </div>
-
+      <custom-token user="[[user]]"></custom-token>
     </div>
   </template>
 
@@ -77,6 +78,7 @@
       behaviors: [FirebaseBehavior],
 
       properties: {
+        user: Object,
         locMemesAll: {
           type: String,
           value: function() {

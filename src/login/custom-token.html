@@ -1,0 +1,90 @@
+
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
+
+<dom-module id="custom-token">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        margin: 20px;
+        padding: 20px;
+        background-color: #dde;
+      }
+      a {
+        text-decoration: none;
+      }
+    </style>
+    
+    <iron-ajax
+      id="ajax"
+      url="http://localhost:3001/token"
+      last-response="{{token}}"
+      handle-as="text"
+    ></iron-ajax>
+
+    <paper-button raised on-tap="obtenerUrlDescarga">Obtener URL Descarga</paper-button>
+    
+    <a href$="[[enlace]]">Descargar archivo</a>
+    
+    <paper-button raised on-tap="createCustomToken">Crear custom token</paper-button>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'custom-token',
+
+      behaviors: [FirebaseBehavior],
+
+      properties: {
+        enlace: String,
+        user: Object,
+        token: {
+          type: String,
+          observer: 'nuevoTokenRecibido'
+        }
+      },
+
+     obtenerUrlDescarga: function() {
+        var that = this;
+        var refstorage = this.fbStorageRef('files/polymer-desarrolloweb.pdf');
+        refstorage.getDownloadURL()
+          .then(function(url) {
+            that.enlace = url;
+            console.log('laurl:', url);
+          }).catch(function(err) {
+            console.log('error al obtener la URL', err);
+          });
+      },
+
+      createCustomToken: function() {
+        var that = this;
+        this.fbauth().getToken(true) 
+          .then( function(token) {
+            console.log(token)
+            var requestHeaders = {
+              authtoken: JSON.stringify(token)
+            }
+            that.$.ajax.headers = requestHeaders;
+            that.$.ajax.generateRequest();
+          })
+          .catch(function(error){
+            console.log(error);
+          });
+      },
+
+      nuevoTokenRecibido: function(token) {
+        if(token) {
+          this.fbauth().signInWithCustomToken(token)
+            .then(function(user) {
+              console.log('nuevouser: ', user);
+            })
+            .catch(function(error) {
+              console.log('error en sign con token', error);
+            });
+        }
+      }
+
+    });
+  </script>
+</dom-module>
